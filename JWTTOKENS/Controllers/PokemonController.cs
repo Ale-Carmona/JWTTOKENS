@@ -18,12 +18,16 @@ namespace JWTTOKENS.Controllers
             new Models.PokemonModels { Id = 3, Name = "Squirtle", Type = "Water", Level = 12, Description = "A small turtle that squirts water." }
         };
 
+        #region--> GET: api/Pokemon
         [HttpGet]
         public IActionResult GetAllPokemons()
         {
             return Ok(_pokemons);
         }
+        #endregion
 
+
+        #region--> GET: api/Pokemon/{id}
         [HttpGet("{id}")]
         public IActionResult GetPokemonById(int id)
         {
@@ -33,7 +37,10 @@ namespace JWTTOKENS.Controllers
 
             return Ok(pokemon);
         }
+        #endregion
 
+
+        #region--> POST: api/Pokemon
         [HttpPost]
         public IActionResult CreatePokemon([FromBody] Models.PokemonModels newPokemon)
         {
@@ -55,5 +62,44 @@ namespace JWTTOKENS.Controllers
             _pokemons.Add(newPokemon);
             return CreatedAtAction(nameof(GetPokemonById), new { id = newPokemon.Id }, newPokemon);
         }
+        #endregion
+
+
+        #region--> PUT: api/Pokemon/{id}
+        [HttpPut("{id}")]
+        public IActionResult UpdatePokemon(int id, [FromBody] Models.PokemonModels updatedPokemon)
+        {
+            if (updatedPokemon is null)
+                return BadRequest(new { message = "El cuerpo de la petición no puede estar vacío." });
+
+            var existingPokemon = _pokemons.FirstOrDefault(p => p.Id == id);
+            if (existingPokemon is null)
+                return NotFound(new { message = $"Pokémon con Id {id} no encontrado." });
+
+            // Actualizar campos
+            existingPokemon.Name = updatedPokemon.Name;
+            existingPokemon.Type = updatedPokemon.Type;
+            existingPokemon.Level = updatedPokemon.Level;
+            existingPokemon.Description = updatedPokemon.Description;
+
+            return Ok(new { message = "Pokémon actualizado correctamente.", pokemon = existingPokemon });
+        }
+        #endregion
+
+
+        #region--> DELETE: api/Pokemon/{id}
+        [HttpDelete("{id}")]
+        public IActionResult DeletePokemon(int id)
+        {
+            var pokemon = _pokemons.FirstOrDefault(p => p.Id == id);
+            if (pokemon is null)
+                return NotFound(new { message = $"Pokémon con Id {id} no encontrado." });
+
+            _pokemons.Remove(pokemon);
+
+            return Ok(new { message = $"Pokémon con Id {id} eliminado correctamente." });
+        }
+        #endregion
+
     }
 }
